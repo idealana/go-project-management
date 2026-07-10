@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/idealana/project-management/models/types"
+	"github.com/idealana/go-project-management/models/types"
 
 	"github.com/google/uuid"
 )
