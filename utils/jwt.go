@@ -22,7 +22,7 @@ func GenerateToken(userID int64, role, email string, publicID uuid.UUID) (string
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SigningString([]byte(secret))
+	return token.SignedString([]byte(secret))
 }
 
 func GenerateRefreshToken(userID int64) (string, error) {
@@ -35,5 +35,5 @@ func GenerateRefreshToken(userID int64) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SigningString([]byte(secret))
+	return token.SignedString([]byte(secret))
 }
