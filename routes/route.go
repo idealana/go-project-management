@@ -28,4 +28,7 @@ func Setup(app *fiber.App, uc *controllers.UserController) {
 			return utils.Unauthorized(ctx, "Unathorized", err.Error())
 		},
 	}))
+
+	userGroup := api.Group("/users")
+	userGroup.Get("/:id", uc.GetUser)
 }
