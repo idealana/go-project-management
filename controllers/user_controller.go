@@ -6,6 +6,7 @@ import (
 	"github.com/idealana/go-project-management/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/jinzhu/copier"
 )
 
 type UserController struct {
@@ -30,6 +31,9 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 	if err := c.service.Register(user); err != nil {
 		return utils.BadRequest(ctx, "Register Failed", err.Error())
 	}
+
+	var userResponse models.UserResponse
+	copier.Copy(&userResponse, &user)
 	
-	return utils.Success(ctx, "Register Success", user)
+	return utils.Success(ctx, "Register Success", userResponse)
 }
