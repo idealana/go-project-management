@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"math"
+	"strconv"
+
 	"github.com/idealana/go-project-management/models"
 	"github.com/idealana/go-project-management/services"
 	"github.com/idealana/go-project-management/utils"
@@ -79,4 +82,36 @@ func (c *UserController) GetUser(ctx *fiber.Ctx) error {
 	}
 
 	return utils.Success(ctx, "Data Found", userResponse)
+}
+
+func (c *UserController) GetUserPagination(ctx *fiber.Ctx) error {
+	page, _ := strconv.Atoi(ctx.Query("page", "1"))
+	limit, _ := strconv.Atoi(ctx.Query("limit", "10"))
+	offset := (page - 1) * limit
+
+	filter := ctx.Query("filter")
+	sort := ctx.Query("sort")
+
+	users, total, err := c.service.GetAllPagination(filter, sort, limit, offset)
+	if err != nil {
+		return utils.BadRequest(ctx, "Failed to get data", err.Error())
+	}
+
+	var userResponse []models.UserResponse
+	copier.Copy(&userResponse, &users)
+
+	meta := utils.PaginationMeta{
+		Page: page,
+		Limit: limit,
+		Total: int(total),
+		TotalPage: int(math.Ceil(float64(total) / float64(limit))),
+		Filter: filter,
+		Sort: sort,
+	}
+
+	if total == 0 {
+		return utils.NotFoundPagination(ctx, "Data not found", userResponse, meta)
+	}
+
+	return utils.SuccessPagination(ctx, "Success", userResponse, meta)
 }
