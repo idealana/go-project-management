@@ -9,6 +9,7 @@ import (
 	"github.com/idealana/go-project-management/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
 )
 
@@ -114,4 +115,35 @@ func (c *UserController) GetUserPagination(ctx *fiber.Ctx) error {
 	}
 
 	return utils.SuccessPagination(ctx, "Success", userResponse, meta)
+}
+
+func (c *UserController) UpdateUser(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	publicID, err := uuid.Parse(id)
+	if err != nil {
+		return utils.BadRequest(ctx, "Invalid ID Format", err.Error())
+	}
+
+	var user models.User
+	if err := ctx.BodyParser(&user); err != nil {
+		return utils.BadRequest(ctx, "Failed to Parsing Data", err.Error())
+	}
+
+	user.PublicID = publicID
+
+	if err := c.service.Update(&user); err != nil {
+		return utils.BadRequest(ctx, "Failed to Update Data", err.Error())
+	}
+
+	userUpdated, err := c.service.GetByPublicID(id)
+	if err != nil {
+		return utils.InternalServerError(ctx, "Failed to Get Data", err.Error())
+	}
+
+	var userResponse models.UserResponse
+	if err := copier.Copy(&userResponse, &userUpdated); err != nil {
+		return utils.InternalServerError(ctx, "Error Parsing Data", err.Error())
+	}
+
+	return utils.Success(ctx, "Update Successful", userResponse)
 }
