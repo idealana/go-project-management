@@ -42,4 +42,5 @@ func Setup(app *fiber.App,
 	boardGroup.Post("/", bc.CreateBoard)
 	boardGroup.Post("/:id/members", bc.AddBoardMembers)
 	boardGroup.Put("/:id", bc.UpdateBoard)
+	boardGroup.Delete("/:id/members", bc.RemoveBoardMembers)
 }
