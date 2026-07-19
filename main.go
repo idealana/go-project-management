@@ -30,9 +30,11 @@ func main() {
 	)
 
 	boardRepo := repositories.NewBoardRepository()
+	boardMemberRepo := repositories.NewBoardMemberRepository()
 	boardService := services.NewBoardService(
 		boardRepo,
 		userRepo,
+		boardMemberRepo,
 	)
 	boardController := controllers.NewBoardController(
 		boardService,
