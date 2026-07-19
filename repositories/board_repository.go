@@ -1,6 +1,7 @@
 package repositories
 
 import (
+  "strings"
   "time"
 
   "github.com/idealana/go-project-management/config"
@@ -13,6 +14,7 @@ type BoardRepository interface {
   FindByPublicID(publicID string) (*models.Board, error)
   AddMember(boardID uint, userIDs []uint) error
   RemoveMembers(boardID uint, userIDs []uint) error
+  FindAllByUserPagination(userPublicID, filter, sort string, limit, offset int) ([]models.Board, int64, error)
 }
 
 type boardRepository struct {
@@ -76,4 +78,50 @@ func (r *boardRepository) RemoveMembers(boardID uint, userIDs []uint) error {
     Where("board_internal_id = ? AND user_internal_id IN (?)", boardID, userIDs).
     Delete(&models.BoardMember{}).
     Error
+}
+
+func (r *boardRepository) FindAllByUserPagination(userPublicID, filter, sort string, limit, offset int) ([]models.Board, int64, error) {
+  var boards []models.Board
+	var total int64
+
+	db := config.DB.
+    Model(&models.Board{}).
+    Where("owner_public_id = ? OR internal_id IN (" +
+      "SELECT board_members.board_internal_id FROM board_members " +
+      "JOIN users ON users.internal_id = board_members.user_internal_id " +
+      "WHERE users.public_id = ?)", userPublicID, userPublicID)
+
+	if filter != "" {
+		db = db.Where("title Ilike ?", "%" + filter + "%")
+	}
+
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if sort != "" {
+		if sort == "-id" {
+			sort = "-internal_id"
+		} else if sort == "id" {
+			sort = "internal_id"
+		}
+
+		if strings.HasPrefix(sort, "-") {
+			sort = strings.TrimPrefix(sort, "-") + " DESC"
+		} else {
+			sort += " ASC"
+		}
+
+		db = db.Order(sort)
+
+	} else {
+    db = db.Order("created_at DESC")
+  }
+
+	err := db.Limit(limit).
+		Offset(offset).
+		Find(&boards).
+		Error
+
+	return boards, total, err
 }

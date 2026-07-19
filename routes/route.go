@@ -39,6 +39,7 @@ func Setup(app *fiber.App,
 	userGroup.Delete("/:id", uc.DeleteUser)
 
 	boardGroup := api.Group("/boards")
+	boardGroup.Get("/me", bc.GetMyBoardPagination)
 	boardGroup.Post("/", bc.CreateBoard)
 	boardGroup.Post("/:id/members", bc.AddBoardMembers)
 	boardGroup.Put("/:id", bc.UpdateBoard)
