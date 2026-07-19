@@ -29,8 +29,18 @@ func main() {
 		userService,
 	)
 
+	boardRepo := repositories.NewBoardRepository()
+	boardService := services.NewBoardService(
+		boardRepo,
+		userRepo,
+	)
+	boardController := controllers.NewBoardController(
+		boardService,
+	)
+
 	routes.Setup(app,
 		userController,
+		boardController,
 	)
 
 	port := config.AppConfig.AppPort
