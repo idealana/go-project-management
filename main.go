@@ -40,9 +40,21 @@ func main() {
 		boardService,
 	)
 
+	listPosRepo := repositories.NewListPositionRepository()
+	listRepo := repositories.NewListRepository()
+	listService := services.NewListService(
+		listRepo,
+		boardRepo,
+		listPosRepo,
+	)
+	listController := controllers.NewListController(
+		listService,
+	)
+
 	routes.Setup(app,
 		userController,
 		boardController,
+		listController,
 	)
 
 	port := config.AppConfig.AppPort

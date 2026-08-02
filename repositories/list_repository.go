@@ -3,6 +3,8 @@ package repositories
 import (
     "github.com/idealana/go-project-management/config"
     "github.com/idealana/go-project-management/models"
+
+    "github.com/google/uuid"
 )
 
 type ListRepository interface {
@@ -10,6 +12,10 @@ type ListRepository interface {
     Update(list *models.List) error
     Delete(id uint) error
     UpdatePosition(boardPublicID string, position []string) error
+    GetCardPosition(listPublicID string) ([]uuid.UUID, error)
+    FindByBoardID(boardID string) ([]models.List, error)
+    FindByPublicID(publicID string) (*models.List, error)
+    FindByID(id uint) (*models.List, error)
 }
 
 type listRepository struct {
@@ -43,4 +49,45 @@ func (r *listRepository) UpdatePosition(boardPublicID string, position []string)
         Where("board_internal_id = (SELECT internal_id FROM boards WHERE public_id = ?)", boardPublicID).
         Update("list_order", position).
         Error
+}
+
+func (r *listRepository) GetCardPosition(listPublicID string) ([]uuid.UUID, error) {
+    var position models.CardPosition
+    err := config.DB.
+        Joins("JOIN lists ON lists.internal_id = card_positions.list_internal_id").
+        Where("lists.public_id = ?", listPublicID).
+        First(&position).
+        Error
+
+    return position.CardOrder, err
+}
+
+func (r *listRepository) FindByBoardID(boardID string) ([]models.List, error) {
+    var lists []models.List
+    err := config.DB.
+        Where("board_public_id = ?", boardID).
+        Order("internal_id ASC").
+        Find(&lists).
+        Error
+
+    return lists, err
+}
+
+func (r *listRepository) FindByPublicID(publicID string) (*models.List, error) {
+    var list models.List
+    err := config.DB.
+        Where("public_id = ?", publicID).
+        First(&list).
+        Error
+
+    return &list, err
+}
+
+func (r *listRepository) FindByID(id uint) (*models.List, error) {
+    var list models.List
+    err := config.DB.
+        First(&list, id).
+        Error
+
+    return &list, err
 }
