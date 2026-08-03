@@ -64,3 +64,17 @@ func (c *ListController) UpdateList(ctx *fiber.Ctx) error {
 
 	return utils.Success(ctx, "List successfully updated", updatedList)
 }
+
+func (c *ListController) GetListOnBoard(ctx *fiber.Ctx) error {
+	boardPublicID := ctx.Params("board_id")
+	if _, err := uuid.Parse(boardPublicID); err != nil {
+		return utils.BadRequest(ctx, "Invalid Board ID", err.Error())
+	}
+
+	lists, err := c.service.GetByBoardID(boardPublicID)
+	if err != nil {
+		return utils.NotFound(ctx, "List not found", err.Error())
+	}
+
+	return utils.Success(ctx, "Data successfully retrived", lists)
+}
