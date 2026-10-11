@@ -18,6 +18,7 @@ var (
 
 type Config struct {
 	AppPort string
+	AppUrl string
 	DBHost string
 	DBPort string
 	DBUser string
@@ -36,6 +37,7 @@ func LoadEnv() {
 
 	AppConfig = &Config{
 		AppPort: getEnv("APP_PORT", "3030"),
+		AppUrl: getEnv("APP_URL", "http://localhost:3030"),
 		DBHost: getEnv("DB_HOST", "localhost"),
 		DBPort: getEnv("DB_PORT", "5432"),
 		DBUser: getEnv("DB_USER", "postgres"),
