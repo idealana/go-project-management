@@ -100,3 +100,17 @@ func (c *CardController) DeleteCard(ctx *fiber.Ctx) error {
 
 	return utils.Success(ctx, "Card successfully deleted", publicID)
 }
+
+func (c *CardController) GetCardDetail(ctx *fiber.Ctx) error {
+	cardPublicID := ctx.Params("id")
+	card, err := c.service.GetByPublicID(cardPublicID)
+	if err != nil {
+		return utils.InternalServerError(ctx, "Failed to get card data", err.Error())
+	}
+
+	if card == nil {
+		return utils.NotFound(ctx, "Card not found", err.Error())
+	}
+
+	return utils.Success(ctx, "Card successfully retrived", card)
+}
